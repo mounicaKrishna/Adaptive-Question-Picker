@@ -338,7 +338,6 @@ def student_session(Student_id,Topic_id):
             session['q_id_points']=[]
             # if not 'questions' in session:
             data.append({"x_axis":0,"y_axis":0})
-               
         session['last_session_score']=last_session_score
         session['response'] = 'session_'+str(session_count)+'_'+Student_id+'_'+Topic_id
         session['Difficulty_level'] = Updated_Difficulty_level
