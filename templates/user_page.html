@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        div.topic_id{text-align: left;}
+        div.level{text-align: right;}
+        h5.class_topic{
+            border: solid black; 
+            padding: 10px;
+            height: 50;
+            margin:0;
+            margin-top: 100px;
+            /* margin-bottom: 150px; */
+            margin-right: 700px;
+            margin-left: 100px;
+        }
+        
+
+        h4.ex1 {
+            border: solid black; 
+            padding: 150px;
+            height: 100;
+            margin:0;
+            /* margin-top: 100px; */
+            /* margin-bottom: 150px; */
+            margin-right: 700px;
+            margin-left: 100px;
+            
+        }
+        /* div.questions_points{
+            text-align:right;
+            margin-right: 0px;
+            margin-top: 0px;
+        } */
+        div.column {
+            border: solid black; 
+            padding: 25px;
+            height: 50;
+            margin:0;
+            /* margin-top: 100px; */
+            /* margin-bottom: 150px; */
+            margin-right: 700px;
+            margin-left: 100px;
+        }
+        div.curve_chart{
+            text-align: right;
+        }
+        div.total{
+            text-align-last: start;
+            vertical-align: right;
+        }
+    </style>
+    <script type="text/javascript">
+
+        window.onload = function () {
+            var datap=[]
+            var dataPoints = JSON.parse('{{data | tojson | safe}}');
+            console.log(dataPoints)
+            console.log(typeof(dataPoints))
+            var chart = new CanvasJS.Chart("chartContainer",
+          {
+            title:{
+            text: "Score progress"
+            },
+             data: [
+                {
+                type: "line",
+                dataPoints:datap
+                }
+            ]
+          });
+          
+          function addData(dps) {
+            
+            for (var i = 0; i < dps.length; i++) {
+                datap.push({
+                    x: dps[i].x_axis,
+                    y: dps[i].y_axis
+                });
+            }
+        chart.render();
+        }
+        addData(dataPoints)
+        }
+        </script>
+       <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <title>Topic Started</title>
+</head>
+
+<body>
+    <h2 style="color:black;margin-left: 75px;"> 
+        <img src = "{{url_for('static', filename = 'student1.jpg')}}" height="50" width="50"/>      Hello Student
+    </h2>
+    <div class="container-fluid"></div>
+        <div class="row">
+            <div class="col-lg-10">
+                <h5 class="class_topic"> 
+                    <div class="topic_id"> Topic - {{session_topic_id}} </div>
+                    <div class="level"> Level - {{session_difficulty_level}}</div>
+                </h5>
+                <h4 class="ex1">
+                    <div class="container-fluid-top-left">
+                        Points: {{session_question_points}} pts
+                    </div>
+                    <div class = "question"> Question : {{q_data}}</div>      
+                </h4>
+                <div class="column">
+                    <form name="Studentans_form" method ='POST'>
+                        <label for="Studentans">Response Input</label>
+                        <input type="text" id="Studentans_id" name="Studentans">
+                        <button type="submit" class="btn btn-primary">Check Answer</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-2" style="text-align: right;">
+                <div class="total">
+                    <h2>Total Attempts:      {{total_attempts}} </h2>
+                    <h2>Correct Attempts:    </h2>
+                    <h2>Incorrect Attempts:  </h2>
+                </div>
+                <div class="total" style="text-align:right; margin-left: 10%; text-align-last: center;">
+                    <h1>{{session_last_score}}</h1>
+                    <h2>Topic Score</h2>
+                </div> 
+                <div id="chartContainer" style="height: 300px; width: 50%;"></div>
+            </div> 
+        </div>    
+        
+    </div>
+</body>
+</html>

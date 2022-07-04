@@ -1,0 +1,82 @@
+{
+    "user_id": "ObjectId",
+    "session_type": "String",
+    "session_start_date_time": "Timestamp",
+    "session_end_date_time": "Timestamp",
+    "session_topic_id": "ObjectId",
+    "session_student_entery_level": "String",
+    "session_student_exit_level": "String",
+    "session_questions_responses_data": [
+        {
+            "Level": "String",
+            "Q_no": "String",
+            "Response": "String",
+            "Result": "Boolean",
+            "T_bonus": "String",
+            "S_bonus": "String",
+            "Points_Scored": "String",
+            "Response_Time": "String"
+        },
+        {
+            "Level": "String",
+            "Q_no": "String",
+            "Response": "String",
+            "Result": "Boolean",
+            "T_bonus": "String",
+            "S_bonus": "String",
+            "Points_Scored": "String",
+            "Response_Time": "String"
+        },
+        {
+            "Level": "String",
+            "Q_no": "String",
+            "Response": "String",
+            "Result": "Boolean",
+            "T_bonus": "String",
+            "S_bonus": "String",
+            "Points_Scored": "String",
+            "Response_Time": "String"
+        }
+    ],
+    "session_points_earned_total": "String",
+    "session_points_deducted_total": "String",
+    "session_final_score": "String",
+    "session_topic_complete": "Boolean",
+    
+}
+
+
+session_api_initialcall
+input - 
+    "user_id": "ObjectId",
+    "session_topic_id": "ObjectId",
+
+create - 
+    "session_type": "String",
+    "session_start_date_time": "Timestamp",
+    "session_student_entery_level": Easy,
+
+stroe_session_student_ques_response
+input-
+"session_questions_responses_data"["Level"]: "String"
+"session_questions_responses_data"["T_bonus"]: "String"
+"session_questions_responses_data"["S_bonus"]: "String"
+        
+
+create-
+"session_points_earned_total": "String",
+"session_questions_responses_data"["Q_no"]: "String" - question picker api call
+"session_questions_responses_data"["Response"]: "String" get student ans func
+"session_questions_responses_data"["Result"]: "String" - evaluate ans func
+"session_questions_responses_data"["Points_Scored"]: "String" - score api (variable total points) 
+"session_questions_responses_data"["Response_Time"]: "String" -calculate
+
+session_api_ending
+input- 
+"session_student_exit_level": "String",
+create-
+"session_end_date_time": "Timestamp",
+"session_final_score": "String",
+"session_topic_complete": "Boolean",
+
+
