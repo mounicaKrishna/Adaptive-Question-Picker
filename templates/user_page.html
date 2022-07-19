@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        div.level{text-align: right;}
+        h5.class_topic{
+            border: solid black; 
+            padding: 10px;
+            height: 50;
+            margin:0;
+            margin-top: 50px;
+            margin-right: 500px;
+            margin-left: 100px;
+        }
+        h4.ex1 {
+            border: solid black; 
+            padding: 130px;
+            height: 100;
+            margin:0;
+            margin-right: 500px;
+            margin-left: 100px;   
+        }
+        div.row1{        
+            padding: 100px;
+            padding-top:0;
+            padding-left:0px;
+            padding-right:0px;
+            width: 300px;
+            margin:0;
+            margin-top: -115px;
+            text-align:right;
+            text-indent: 310px;
+        }
+        div.column {
+            border: solid black; 
+            padding: 20px;
+            height: 50;
+            margin:0;
+            margin-right: 500px;
+            margin-left: 100px;
+        }
+        
+    </style>  
+    <script type="text/javascript">
+        window.onload = function () {
+            var datap=[]
+            var dataPoints = JSON.parse('{{data | tojson | safe}}');
+            console.log(dataPoints)
+            console.log(typeof(dataPoints))
+            var chart = new CanvasJS.Chart("chartContainer",
+          {
+            title:{
+            text: "Score progress"
+            },
+             data: [
+                {
+                type: "line",
+                dataPoints:datap
+                }
+            ]
+          });
+          
+          function addData(dps) {
+            
+            for (var i = 0; i < dps.length; i++) {
+                datap.push({
+                    x: dps[i].x_axis,
+                    y: dps[i].y_axis
+                });
+            }
+        chart.render();
+        }
+        addData(dataPoints)
+        
+        var dataPoints1 = JSON.parse('{{donutdata | tojson | safe}}');
+        var percentage = JSON.parse('{{percent | tojson | safe}}');
+        // console.log(dataPoints1)
+        var chart1 = new CanvasJS.Chart("chartContainer1", {
+        animationEnabled: true,
+        subtitles: [{
+    text:percentage.x,
+    verticalAlign: "center",
+    fontSize: 30,
+    dockInsidePlotArea: true
+}],
+        data: [{
+                 type: "doughnut",
+                 startAngle: 40,
+                 dataPoints: [
+                    {y:dataPoints1.x},
+                    {y:dataPoints1.y}
+                    ]
+             }]
+        });
+        chart1.render();
+    }
+    </script>
+    <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    
+    <script>
+        $("input").keypress(function(event) {
+        event.preventDefault();
+        $("form").submit();
+});
+    </script>
+    
+    <title>Topic Started</title>
+</head>
+
+<body>
+    <h2 style="color:black;margin-left: 75px;"> 
+        <img src = "{{url_for('static', filename = 'student1.jpg')}}" height="50" width="50"/>      Hello Student
+    </h2>
+    <div class="container-fluid">
+        <div class="main-row" style="display: flex;margin-right:0px;margin-left:10px">
+            <div class="col-lg-10" style="flex: 50%;margin-right:-200px;">
+                <h5 class="class_topic"> 
+                    <div class="topic_id"> Topic - {{session_topic_id}} </div>
+                    <div class="level"> Level - {{session_difficulty_level}}</div>
+                </h5>
+                <h4 class="ex1" >
+                    <div class="row1" >
+                        Points:{{session_question_points}}
+                    </div>
+                    <div class = "row2" style="text-align:center;padding-top:0px"> Question : {{q_data}}</div>      
+                </h4>
+                <div class="column">
+                    <form name="Studentans_form" method ='POST' >
+                        <input type="text" id="Studentans_id" name="Studentans" size="75" style="padding: 0px;height: 40px;background: transparent; border: none" >
+                        <input type="submit" style="height: 0px; width: 0px; border: none; padding: 0px" hidefocus="true" />
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-2" style="width: 50%; margin-right:100px">
+                <div id="chartContainer" class="row-1" style="margin-right: 100px;height: 300px; width: 100%;margin-bottom: 10px"></div>
+                <div class="row2" style="display:flex; column-gap: 40px; margin-top: 0px">
+                    <div class="column21">
+                        <div id="chartContainer1" class="row211" style=" display:center;height: 200px"></div>
+                        <div class="row212">
+                            <h2>Total Attempts:      {{total_attempts}} </h2>
+                            <h2>Correct Attempts:    {{correct_attempts}} </h2>
+                            <h2>Incorrect Attempts:  {{incorrect_attempts}} </h2>
+                        </div>
+                    </div>
+                    <div class="column21" style="margin-top: 150px;margin-left:200px">
+                        <h1 align="center">{{session_last_score}}</h1>
+                        <h2 align="center">Topic Score</h2>
+                    </div> 
+                </div>
+                
+            </div> 
+        </div>    
+    </div>
+
+</body>
+</html>
