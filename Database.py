@@ -118,7 +118,6 @@ def score1_func(student_response,q_id):
         if ans_match:
             print('ans match',ans_match)
             question_points = 2
-
             session_last_score_temp = session1['last_session_score']
             print("session_last_score_temp",session_last_score_temp)
             total_points_scored = session_last_score_temp + question_points + time_bonus + streak_bonus
@@ -127,7 +126,7 @@ def score1_func(student_response,q_id):
         else: 
             print('No ans match',ans_match)
             result = "wrong answer"
-            question_points = 0
+            question_points = -1
             time_bonus=0
             streak_bonus=0
             session_last_score_temp = session1['last_session_score']
@@ -157,6 +156,7 @@ def score1_func(student_response,q_id):
     response_dict["complete_status"] = complete_status
     response_dict["Difficulty_level"] = Difficulty_level
     response_dict["ans_match"] = ans_match
+    response_dict['session_last_score_temp']=session_last_score_temp
     # print("response_dict",response_dict)
     return response_dict
 
@@ -200,12 +200,12 @@ def student_session(Student_id,Topic_id):
             session['t_bonus']= score_output["session_questions_responses_data"]["T_bonus"]
             session['s_bonus']= score_output["session_questions_responses_data"]["S_bonus"]
             session['q_id_points'].append({'ques_points':session['ques_points'],'t_bonus':session['t_bonus'],'s_bonus':session['s_bonus']})
-            print("q_id_points *****", session['q_id_points'])
             ans_match = score_output["ans_match"]
-            session['ans_match']=ans_match
             if not ans_match:
-                print("ans not matched 11")
+                session["incorrect_attempts"] = session["incorrect_attempts"]+1
                 session['P_Q_ID']= score_output["session_questions_responses_data"]["Q_no"].split("_")[0]
+            else:
+                session["correct_attempts"] = session["correct_attempts"]+1
             session['last_session_score']= score_output["points_earned_total"]
             session['Difficulty_level'] = score_output['Difficulty_level']
             session_func(score_output)
@@ -242,27 +242,24 @@ def student_session(Student_id,Topic_id):
                     questions_in_session["streak_bonus"]=ques["S_bonus"]
                     print("questions_in_session",questions_in_session)
                     questions_in_session["no_of_questions_per_session"]= no_of_questions_per_session
-                    # session['q_id_points']=[]
-                    # session['q_id_points'].append({'ques_points':ques["Points_Scored"],'t_bonus':ques["T_bonus"],'s_bonus':ques["S_bonus"]})
                 data = []+session['data']
-                print("data 11", data)
-                score_list=[]
-                total_question_points = 0
-                for i,ele in enumerate(session['q_id_points']):
-                    # print("ans match....",session['ans_match'])
-                    t_question_points =  ele['ques_points'] + ele['t_bonus'] + ele['s_bonus']
-                    score_list.append(int(t_question_points))
-                    question_points_array= (i,score_list[-1])
-                    total_question_points = total_question_points + question_points_array[1]
-                    data.append({"x_axis":question_points_array[0]+1,"y_axis":total_question_points}) 
-                    print("data 12",data)
+                print("data 113", data)
+                score_list=[] 
+                total_points_scored = session['data'][-1]['y_axis']
+                print("session last score111",session['last_session_score'] )
+                for i, ele in enumerate(session['q_id_points']):
+                    q_no = len(data)+1
+                    total_points_scored = total_points_scored+ele['ques_points'] + ele['t_bonus'] + ele['s_bonus']
+                    data.append({'x_axis':q_no, 'y_axis':total_points_scored})
+                print("data 114", data)
+                
             else:
                 print("question in session else")
                 data = []
                 score_list=[]
-                total_question_points = 0
+                print(" session['total_question_points']", session['total_question_points'])
+                total_question_points = session['total_question_points']
                 for i,ele in enumerate(session['q_id_points']):
-                    # print("ans match....",session['ans_match'])
                     t_question_points =  ele['ques_points'] + ele['t_bonus'] + ele['s_bonus']
                     score_list.append(int(t_question_points))
                     question_points_array= (i,score_list[-1])
@@ -272,13 +269,20 @@ def student_session(Student_id,Topic_id):
             session_question_points= session['ques_points']
             session_q_id_l = session['q_id_l']
             total_attempts= len(session['q_id_l'])
+            #for percentage calculation in the center of donut chart
+            quotient = session["correct_attempts"] / total_attempts
+            percent = {'x':str(int(quotient * 100))+"%"}
+            donutdata= {'x':session["correct_attempts"],'y': session["incorrect_attempts"]}
+            print("donutdata",donutdata)
             session_ques_id = session['ques_id']
             session_difficulty_level = session['Difficulty_level']
             session_last_score = session['last_session_score']
             session_response = session['response']
             session_topic_id =session['topic_id']
             q_data =question_picker_output['question_data']
-            return render_template('user_page.html', q_data=q_data,data=data,session_question_points=session_question_points,total_attempts= total_attempts,session_topic_id=session_topic_id,session_q_id_l = session_q_id_l,session_ques_id = session_ques_id,session_difficulty_level = session_difficulty_level, session_last_score = session_last_score,session_response=session_response)
+            incorrect_attempts=session["incorrect_attempts"]
+            correct_attempts=session["correct_attempts"]
+            return render_template('user_page.html', q_data=q_data,data=data,donutdata=donutdata,percent=percent,incorrect_attempts=incorrect_attempts,correct_attempts=correct_attempts,session_question_points=session_question_points,total_attempts= total_attempts,session_topic_id=session_topic_id,session_q_id_l = session_q_id_l,session_ques_id = session_ques_id,session_difficulty_level = session_difficulty_level, session_last_score = session_last_score,session_response=session_response)
     #Create a New Session
     else:
         session_list=[]
@@ -292,10 +296,10 @@ def student_session(Student_id,Topic_id):
                 questions_list.append(questions_data)
                 questions=list(itertools.chain.from_iterable(questions_list))
                 session['questions'] = questions
-                print(session['questions'])
+                print("session['questions']",session['questions'])
         #for adding end_date_time for sessions
         if len(session_list)>0:
-            # print("entering in if part of outer else")
+            print("entering in if part of outer else")
             # print("len of mydoc",len(session_list))
             session_end_time_list = []
             q_id_list = []
@@ -303,6 +307,8 @@ def student_session(Student_id,Topic_id):
             session['q_id_points']=[]
             total_question_points=0
             score_list_ques=[]
+            correct_attempts = 0
+            incorrect_attempts = 0
             for i,ele in enumerate(questions):
                 t_question_points=ele['Points_Scored']+ele['T_bonus']+ele['S_bonus']
                 score_list_ques.append(int(t_question_points))
@@ -310,8 +316,12 @@ def student_session(Student_id,Topic_id):
                 total_question_points = total_question_points + question_points_array[1]
                 data.append({"x_axis":question_points_array[0]+1,"y_axis":total_question_points})
                 session['data']= data
-                # print("session data",session['data'])
-            
+                if ele['Points_Scored'] >0:
+                    correct_attempts = correct_attempts+1
+                else:
+                    incorrect_attempts = incorrect_attempts+1
+                session['correct_attempts'] = correct_attempts
+                session['incorrect_attempts'] = incorrect_attempts
             for n in session_list:
                 session_end_time = n.get('session_end_date_time')
                 session_end_time_list.append(session_end_time)
@@ -323,26 +333,36 @@ def student_session(Student_id,Topic_id):
             recent_session= session_list[index_recent_session_end_time]
             recent_session_exit_level = recent_session.get('session_student_exit_level')
             last_session_score = recent_session.get('session_final_score')
+            session['last_session_score']=last_session_score
+            session['total_question_points'] = total_question_points+session['last_session_score']
             recent_topic_status= recent_session.get('session_topic_complete')
             Updated_Difficulty_level = recent_session_exit_level
             print("session",session)
             session_count= len(session_list)+1
         else:
             #for creating a new session with difficulty level- Easy
-            # print("entering in else part of outer else")
+            print("entering in else part of outer else")
             session_count=1
             Updated_Difficulty_level= "Easy"
             last_session_score = 0
             q_id_list = []
             data = [] 
             session['q_id_points']=[]
-            # if not 'questions' in session:
             data.append({"x_axis":0,"y_axis":0})
-        session['last_session_score']=last_session_score
+            session["correct_attempts"] = 0
+            session["incorrect_attempts"] = 0
+        
+        session['last_session_score'] = last_session_score
         session['response'] = 'session_'+str(session_count)+'_'+Student_id+'_'+Topic_id
         session['Difficulty_level'] = Updated_Difficulty_level
         session['q_id_l'] = q_id_list
         total_attempts= len(session['q_id_l'])
+        #for percentage calculation in the center of donut chart
+        quotient = session["correct_attempts"] / total_attempts
+        percent = {'x':str(int(quotient * 100))+"%"}
+        print("percent",percent)
+        donutdata= {'x':session["correct_attempts"],'y': session["incorrect_attempts"]}
+        # print("donutdata",donutdata)
         session_id = session['response']
         session['P_Q_ID']= NULL
         store_session_start_data1 = store_session_start_info(Student_id,Topic_id, session_id, Updated_Difficulty_level)
@@ -358,7 +378,7 @@ def student_session(Student_id,Topic_id):
         session_last_score = session['last_session_score']
         session_response = session['response']
         session_difficulty_level = session['Difficulty_level']
-        return render_template('user_page.html', q_data=q_data,data=data,total_attempts = total_attempts,session_topic_id = session_topic_id,session_last_score = session_last_score, session_response =session_response,session_difficulty_level = session_difficulty_level)
+        return render_template('user_page.html', q_data=q_data,data=data,donutdata=donutdata,percent=percent,incorrect_attempts=session['incorrect_attempts'],correct_attempts=session['correct_attempts'],total_attempts = total_attempts,session_topic_id = session_topic_id,session_last_score = session_last_score, session_response =session_response,session_difficulty_level = session_difficulty_level)
 
 @app.route('/clear_session')
 def clear_session():
